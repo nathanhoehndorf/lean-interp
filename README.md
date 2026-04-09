@@ -59,8 +59,11 @@ The tactic language has combiners:
 - `<;>` (Chain): Applies the second tactic to all subgoals created by the first
 - `try`/`repeat`: Allows for automation and searching
 - `all_goals`: Forces a tactic to run on every open problem simultaneously.
-### Vector Space Basis & Orthogonality
 ### Cosine Similarity & L2 Norm
+#### L2 (Euclidean) Norm
+The L2 norm of a vector $v=[x_1,x_2,\dots,x_n] is its standard length from the origin: \|\|$v_2$\|\|=$\sqrt{\sum_{i=1}^{n}x_i^2}$. In Transformers, the L2 Norm of the residual stream typically grows as one goes deeper into the model. If you are probing a Lean proof, a small L2 norm in the induction direction suggests that the model is unsure or hasn't processes that logic yet. A large L2 norm suggest that a model is committed to a mathematical path.
+#### Cosine Similarity
+Asks how much two vectors points in the same direction.
 ## Machine Learning
 ### Linear Regression
 ### Logistic Regression
