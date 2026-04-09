@@ -129,10 +129,25 @@ $\sum_{e\in E}w_{H}(e)\log\frac{w_{H}(e)}{w_{L}(e)}+(1-w_{H}(e))\log\frac{1-w_{H
 
 ## Transformer Architecture
 ### The Residual Stream
+
+In a classic feed-forward network, information is transformed layer by layer, until the original input is completely unrecognizable. In a Transformer, the architecture is built around Residual Connections, or skip connections. The state of the model at layer $n$ is not just the output of a function-- it is the sum of the previous state and an update. If $x_n$ is the vector in the stream at layer $n$, the next state is $x_{n+1}=x_n+\text{Sublayer}(x_n)$, where `Sublayer` is either a Multi-Head Attention Block or an MLP. Because of this $x+f(x)$ structure, the stream is a continuous vector space of dimension $d_{model}$ that runs throuogh the entire depth of the model.
+
+The residual stream is essentially a running tally. At Layer 0 the stream is initialized with the embedding of the input tokens. As the vector travels through the layers attention heads read from the stream to see what other tokens are releveant, then write their findings back to the stream, and MLP's read the current state to perform logical or factual lookups, then write the result back. Since the operation is additive, the original information is recoverable. Hence, you can train a Linear probe at any layer.
+
+The residual stream is a vector $v \in \mathbb{R}^{d_{model}}. Each sublayer provides a displacement vector $\Delta v$. The stream is inherently linear because it is an additive, and therefore linear, combination of updates: $x_L=x_0+\sum_{i=0}^{L-1}\Delta v_i$. When training the probe, we look for a direction $w$ such that the projection $x_i\cdot w$ correlates with the label. If the model figures out that there are 3 variables in Layer 4, some sublayer in Layer 4 must have written a vector worth three variables into the stream.
+
+The residual stream is where the reasoning lives. Layers 1 and 2 might just contain raw syntax, where Layers 6 through 8 might contain geometric representaions, and Layers 11 and 12 contain the logits.
+
 ### Layer-wise Evolution
-### Byte-Pair Encoding
+
+The study of how a model's internal representation of a concept is incrementally constructed, refined, and predicted. It is a discrete dynamical system where the state vector $x$ moves through a 768-dimensional manifold guided by the vector fields defined by the attention and MLP layers. If we treat the residual stream as a vector space, every layers adds a displacement vector $\Delta x_n$. The evolution of the representation is the trajectory $x_0,x_1,\dots,x_L$. The Feature Extractors in the early layers mainly focus on de-noising and syntax. Probes usually fail on abstract concepts but will succeed on positional ones. The Semantic Convergers in the middle layers see the model combining syntactic tokens into abstract concepts. This is where the linear separability of labels peaks. The Logit Preprocessers in the late layers show the model begin to collapse the abstract representation into the specific tokens it needs to output next. Geometric clarity might actually decrease here.
+
+To quantify this evolution, you train a battery of probes with one for every layer. Then, you plot Probe Accuracy (Loss) vs Layer Number. You can test if an evolution is causal using a technique called activation steering. We can take our direction $w$ and nudge the evolution: $x_6^{new}=x_6^{old}+\alpha w$. By adding this vector during the forward pass, you are manually making the model believe there are more variables than actually exist. If the model's predicted tactic changes to something that expects more variables, then that's causal evidence of layer-wise evolution leading to a specific concept driving the model's behavior.
 ## Mechanistic Interpretability
 ### Linear Representation Hypothesis
+
+The claim that Large Language Models organize high-level concepts as directions, vectors, in a high-dimensional space. The LRH posits that the model maps a semantic concept $C$ to a specific vector $v_C$ in the residual stream. Any activation vector $x$ can be thought of as a sum of these concept vectors.
+
 ### Logit Lens & Tuned Lens
 ### Activation Steering & Saliency
 ### Superposition
