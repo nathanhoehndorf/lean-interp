@@ -76,12 +76,57 @@ The tactic language has combiners:
 #### L2 (Euclidean) Norm
 The L2 norm of a vector $v=[x_1,x_2,\dots,x_n] is its standard length from the origin: \|\|$v_2$\|\|=$\sqrt{\sum_{i=1}^{n}x_i^2}$. In Transformers, the L2 Norm of the residual stream typically grows as one goes deeper into the model. If you are probing a Lean proof, a small L2 norm in the induction direction suggests that the model is unsure or hasn't processes that logic yet. A large L2 norm suggest that a model is committed to a mathematical path.
 #### Cosine Similarity
-Asks how much two vectors points in the same direction.
+Asks how much two vectors points in the same direction. It measure the cosine of the angle between the two vectors: $\cos(\theta)=\frac{A\cdot B}{\lVert A\rVert_2\lVert B\rVert_2}$. If we have a vector for the concept "Commutative Property" and a vector for the concept of "Rewriting an equation," cosine similarity tells us that if the model thinks these concepts are logically related, even if one is more prominent, or has greater magnitude.
+
+Further, cosine similarity should make an excellent tool for Variable Renaming, since the angle of the logic vector should remain nearly identical if the model understands the underlying proof structure.
 ## Machine Learning
 ### Linear Regression
+
+In a standard linear regression, we assume a relationship between the independent variables $X$ and a dependent variable $y$. For our probe,
+- **Input** ($X$): The activation vector from the residual stream. This is a vector is $\mathbb{R}^{768}$.
+- **Output** ($y$): The property labeled, like Variable Count. This is a real scalar.
+- **The Model**: We seek a weight vector $w\in\mathbb{R}^{768}$ and a bias $b$ such that $\hat{y}=w\cdot X+b$.
+
+To find the best $w$, we minimize the Mean Squared Error (MSE). It measures the average squared difference between the model's prediction and the actual label:
+
+$J(w,b)=\frac{1}{n}\sum_{i=1}^{n}\left(y_i-(w\cdot X_i+b)\right)^2
+
+By minimizing this loss, we are rotating and scaling $w$ until it points in the direction that most closely aligns with how the label in question changes within the 768-dimensional space.
+
 ### Logistic Regression
+
+To answer a binary question, we take our linear formula $z=w\cdot X+b$ and wrap it in a Sigmoid Function: $\sigma(z)=\frac{1}{1+e^{-z}}$. This forces the output to stay strictly between 0 and 1, which lets us interpret the result as a probability.
+
+Logistic Regression find a hyperplane that splits the high-dimensional activation space in two. For example: on one side of the plan, the model predicts that there is no logical and symbol, but on the other side it does. The weight vector $w$ is normal to this plane. It is pointing directly in the "Presence of Logical And" direction in the model.  
+
+Logistic Regression uses Binary Cross-Entropy Loss. We care not about Euclidean Distance, but certainty. For a single data point, BCEL is calculated as $L=-[y\log(\hat{y})+(1-y)\log(1-\hat{y})]$.
+
 ### Train/Test splitting for proofs
+
+The samples from Lean proofs are highly correlated. So, instead of a random shuffle of all tactic states, we should collect all unique Theorem Names, randomly assign 80% to training and 20% to testing. 
+
 ### PCA & t-SNE & UMAP
+
+#### Principal Component Analysis
+
+Finds the directions that capture the most variance by taking the eigenvectors of a covariance matrix representing the data. If PCA clearly seperates two components, then we have evidence for global linear structure. Essentially, Principal Component Analysis is an application of the Spectral Theorem to the covariance matrix of activations. Given a centered data matrix $X\in\mathbb{R}^{n\times 768}$, with $n$ the number of Lean states, we compute the sample covariance matrix: $\Sigma=\frac{1}{n-1}X^TX$. Since $\Sigma$ is symmetric and positive semi-definite, it has an orthogonal eigenbasis. PCA finds the unit vector $w$ that maximizes the variance of the projected data:
+
+$w_1=\argmax_{\Lvert w \rVert =1}\text{Var}(Xw)=\argmax_{\Lvert w \Rvert =1} w^T \Sigma w. The solution $w_1$ is the eigenvector corresponding to the largest eigenvalue.
+
+#### t-distributed Stochastic Neighbor Embedding
+
+t-SNE is a non-linear probabilistic technique that looks for neighborhoods instead of variance. It tries to keep points that were close togther in 768-dimensional space close in 2 dimensions. It doesn't care about total or global distance. It's famous for forming beautiful clusters of ideas. t-SNE treats dimensionality reduction as an optimization problem where we minimze the Kullback-Leibler Divergence betwwen two probability distributions. We first look at a high-dimensional space, $P$: we calculate the similarity of a point $x_i$ to $x_j$ as a conditional probability of $j$ given $i$ using a Guassian distribution. This represents the likelihood of $x_i$ picking $x_j$ as its neighbor. Then, a low-dimensional space $Q$, we define similarity $q_{ij}$ between the mapped points $y_i$ and $y_j$ using the student's t-distribution with one degree of freedom. This heavy-tailed distribution helps with the crowding problem. 
+
+We minimize the mismatch between $P$ and $Q$ as: $C=KL(P||Q)=\sum_i \sum_j p_{ij}\log\frac{p_{ij}}{q_{ij}}. We use gradient descent to move the $y$ points around in 2D until the probability of the neighbors in the map matches the probability of the neighbords in the original 768D space.
+
+#### Uniform Manifold Approximation and Projection
+
+UMAP tries to do the same thing as t-SNE but also preserves global structure. It relies on Simplicial Complexes and Fuzzy Sets. We begin with Manifold Approximation: UMAP assumes the activations lie on a locally connected Riemann manifold. To find the manifold, it constructs a Vietoris-Rips complex by drawing a radius around every point and connecting them if they overlap. Then, to account for uneven data density, UMAP uses a fuzzy simplice, or radius, that grows and shrinks so that every point is connected to at least $k$ of its nearest neighbors. The result is a weighted graph where the edge represents the probability that a connection exists.
+
+Finally, UMAP finds a low-dimensional representation that has the most similar fuzzy topological structure. It minimzes a specific form of Cross-Entropy:
+
+$ \sum_{e\in E}w_{H}(e)\log\frac{w_{H}(e)}{w_{L}(e)}+(1-w_{H}(e))\log\frac{1-w_{H}(e)}{1-w_{L}(e)}$, where $w_H$ is the edge weight in high dimensions and $w_L$ is the edge weight in low dimensions.
+
 ## Transformer Architecture
 ### The Residual Stream
 ### Layer-wise Evolution
