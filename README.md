@@ -149,8 +149,3 @@ To quantify this evolution, you train a battery of probes with one for every lay
 The claim that Large Language Models organize high-level concepts as directions, vectors, in a high-dimensional space. The LRH posits that the model maps a semantic concept $C$ to a specific vector $v_C$ in the residual stream. Any activation vector $x$ can be thought of as a sum of these concept vectors: $x=\sum_i \alpha_i v_C_i+\text{noise}$, where $\alpha_i$ is the intensity or presence of that concept. Since these concepts are stored as directions, we can use linear probes to slice the space and find them. If the representation were non-linear, a linear probe fails to find the cconcept, even if the model knew it.
 
 Computation through projection is the leading theory for why a model why choose to store things linearly. When an attention head or an MLP layer reads the residual stream, it performs a linear transformation via a matrix multiplcation. If a concept is stored linearly, a single matrix operation can extract it via dot product: $\text{Activation}=\sigma(W\cdot x+b)$. By storing concepts as directions, the model makes it mathematically easy for subsequent layers to retrieve and use that information.
-## Tooling & Data Alignment
-### LeanDojo
-### TransformerLens
-### JSON
-### State $S_i$ (Lean Goal) $\rightleftarrow$ Activation $A_i$ (Hidden State)
