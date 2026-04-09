@@ -1,18 +1,18 @@
 # TheGeometryOfFormalLogic
 The Geometry of Formal Logic: Linear Probing of Learn 4 Tactic States in Mathematical Language Models
 
+* Try circuit analysis using SAE circuits
+
 ## To-Do
-1. Finish Preliminary Research
-2. Task 1: The Mutable Proposal (Tomorrow). * Commit to 1 to 3 specific properties of the Lean 4 state you want to find in the model's residual stream. Ideas: Variable count, operator presence (e.g., does a specific vector encode the presence of an equality =), or goal depth (number of nested parentheses).
-3. The Data Harvester. * Modify your extract_data.py script to run across a larger chunk of your example repository or Mathlib.Write a simple parsing function to automatically generate your labels ($y$) from the state_before strings.
-4. Task 3: Build the Gold Dataset. * Extract and save 1,000 to 5,000 (State, Label) pairs. Split this cleanly into Training (70%), Validation (15%), and Test (15%) sets.
-5. Task 4: The Layer Sweep. * Train your linear probe on the training set, but do it for every single layer of Pythia-160m (Layers 0 through 11). Hypothesis: Early layers act like a dictionary and won't know the mathematical properties. Middle/late layers will show a sudden drop in generalization loss as the representation crystallizes.
-6. Task 5: The Control Experiment. * Shuffle your $y$ labels randomly and retrain. If the loss still drops, your probe is too large or your dataset is too small. This is crucial for proving you found a real geometric feature, not statistical noise.
-7. Task 6: The Transfer Test. * Train a probe to find the "Variable Count" vector on addition problems, then test it on multiplication problems. Does the linear direction generalize across different mathematical operators?
-8. Task 7: Dimensionality Reduction. * Extract the activations for 100 different Lean states. Run Principal Component Analysis (PCA) on these 768-dimensional vectors. Do states with the same properties naturally cluster together in the top 2 or 3 principal components?
-9. Task 8: Activation Steering (Optional but High-Impact). * Take the weights of your successful linear probe. This is your "Concept Vector." Pass a new Lean state into the model, but artificially add or subtract this vector from the residual stream during the forward pass. Does this causally change the model's next token prediction?
-10. Task 9: Data Visualization. * Generate the core plots: Layer-wise accuracy curves, PCA scatter plots of the activation space, and a table comparing your real probe's accuracy versus the randomized control.
-11. Drafting the Paper.
+1. The Data Harvester. * Modify your extract_data.py script to run across a larger chunk of your example repository or Mathlib.Write a simple parsing function to automatically generate your labels ($y$) from the state_before strings.
+2. Task 3: Build the Gold Dataset. * Extract and save 1,000 to 5,000 (State, Label) pairs. Split this cleanly into Training (70%), Validation (15%), and Test (15%) sets.
+3. Task 4: The Layer Sweep. * Train your linear probe on the training set, but do it for every single layer of Pythia-160m (Layers 0 through 11). Hypothesis: Early layers act like a dictionary and won't know the mathematical properties. Middle/late layers will show a sudden drop in generalization loss as the representation crystallizes.
+4. Task 5: The Control Experiment. * Shuffle your $y$ labels randomly and retrain. If the loss still drops, your probe is too large or your dataset is too small. This is crucial for proving you found a real geometric feature, not statistical noise.
+5. Task 6: The Transfer Test. * Train a probe to find the "Variable Count" vector on addition problems, then test it on multiplication problems. Does the linear direction generalize across different mathematical operators?
+6. Task 7: Dimensionality Reduction. * Extract the activations for 100 different Lean states. Run Principal Component Analysis (PCA) on these 768-dimensional vectors. Do states with the same properties naturally cluster together in the top 2 or 3 principal components?
+7. Task 8: Activation Steering (Optional but High-Impact). * Take the weights of your successful linear probe. This is your "Concept Vector." Pass a new Lean state into the model, but artificially add or subtract this vector from the residual stream during the forward pass. Does this causally change the model's next token prediction?
+8. Task 9: Data Visualization. * Generate the core plots: Layer-wise accuracy curves, PCA scatter plots of the activation space, and a table comparing your real probe's accuracy versus the randomized control.
+9. Drafting the Paper.
 
 ## Mathematical Concepts
 ### Lean Type Hierarchy
