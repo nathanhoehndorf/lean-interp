@@ -111,13 +111,13 @@ The samples from Lean proofs are highly correlated. So, instead of a random shuf
 
 Finds the directions that capture the most variance by taking the eigenvectors of a covariance matrix representing the data. If PCA clearly seperates two components, then we have evidence for global linear structure. Essentially, Principal Component Analysis is an application of the Spectral Theorem to the covariance matrix of activations. Given a centered data matrix $X\in\mathbb{R}^{n\times 768}$, with $n$ the number of Lean states, we compute the sample covariance matrix: $\Sigma=\frac{1}{n-1}X^TX$. Since $\Sigma$ is symmetric and positive semi-definite, it has an orthogonal eigenbasis. PCA finds the unit vector $w$ that maximizes the variance of the projected data:
 
-$w_1=\argmax_{\Lvert w \rVert =1}\text{Var}(Xw)=\argmax_{\Lvert w \Rvert =1} w^T \Sigma w. The solution $w_1$ is the eigenvector corresponding to the largest eigenvalue.
+$w_1=\argmax_{\Lvert w \rVert =1}\text{Var}(Xw)=\argmax_{\Lvert w \Rvert =1} w^T \Sigma w$. The solution $w_1$ is the eigenvector corresponding to the largest eigenvalue.
 
 #### t-distributed Stochastic Neighbor Embedding
 
 t-SNE is a non-linear probabilistic technique that looks for neighborhoods instead of variance. It tries to keep points that were close togther in 768-dimensional space close in 2 dimensions. It doesn't care about total or global distance. It's famous for forming beautiful clusters of ideas. t-SNE treats dimensionality reduction as an optimization problem where we minimze the Kullback-Leibler Divergence betwwen two probability distributions. We first look at a high-dimensional space, $P$: we calculate the similarity of a point $x_i$ to $x_j$ as a conditional probability of $j$ given $i$ using a Guassian distribution. This represents the likelihood of $x_i$ picking $x_j$ as its neighbor. Then, a low-dimensional space $Q$, we define similarity $q_{ij}$ between the mapped points $y_i$ and $y_j$ using the student's t-distribution with one degree of freedom. This heavy-tailed distribution helps with the crowding problem. 
 
-We minimize the mismatch between $P$ and $Q$ as: $C=KL(P||Q)=\sum_i \sum_j p_{ij}\log\frac{p_{ij}}{q_{ij}}. We use gradient descent to move the $y$ points around in 2D until the probability of the neighbors in the map matches the probability of the neighbords in the original 768D space.
+We minimize the mismatch between $P$ and $Q$ as: $C=KL(P||Q)=\sum_i \sum_j p_{ij}\log\frac{p_{ij}}{q_{ij}}$. We use gradient descent to move the $y$ points around in 2D until the probability of the neighbors in the map matches the probability of the neighbords in the original 768D space.
 
 #### Uniform Manifold Approximation and Projection
 
@@ -125,7 +125,7 @@ UMAP tries to do the same thing as t-SNE but also preserves global structure. It
 
 Finally, UMAP finds a low-dimensional representation that has the most similar fuzzy topological structure. It minimzes a specific form of Cross-Entropy:
 
-$ \sum_{e\in E}w_{H}(e)\log\frac{w_{H}(e)}{w_{L}(e)}+(1-w_{H}(e))\log\frac{1-w_{H}(e)}{1-w_{L}(e)}$, where $w_H$ is the edge weight in high dimensions and $w_L$ is the edge weight in low dimensions.
+$\sum_{e\in E}w_{H}(e)\log\frac{w_{H}(e)}{w_{L}(e)}+(1-w_{H}(e))\log\frac{1-w_{H}(e)}{1-w_{L}(e)}$, where $w_H$ is the edge weight in high dimensions and $w_L$ is the edge weight in low dimensions.
 
 ## Transformer Architecture
 ### The Residual Stream
