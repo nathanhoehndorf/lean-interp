@@ -4,6 +4,9 @@ The Geometry of Formal Logic: Linear Probing of Learn 4 Tactic States in Mathema
 * Try circuit analysis using SAE circuits
 
 ## To-Do
+
+1. Find Evidence for linear structure. If not, then investigate non-linear (hyperbolic).
+
 1. The Data Harvester. * Modify your extract_data.py script to run across a larger chunk of your example repository or Mathlib.Write a simple parsing function to automatically generate your labels ($y$) from the state_before strings.
 2. Task 3: Build the Gold Dataset. * Extract and save 1,000 to 5,000 (State, Label) pairs. Split this cleanly into Training (70%), Validation (15%), and Test (15%) sets.
 3. Task 4: The Layer Sweep. * Train your linear probe on the training set, but do it for every single layer of Pythia-160m (Layers 0 through 11). Hypothesis: Early layers act like a dictionary and won't know the mathematical properties. Middle/late layers will show a sudden drop in generalization loss as the representation crystallizes.

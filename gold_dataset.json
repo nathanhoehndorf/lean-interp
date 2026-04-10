@@ -1,0 +1,10 @@
+{
+  "train": [],
+  "val": [],
+  "test": [
+    {
+      "state": "a : Nat\n\u22a2 a + 1 = a.succ",
+      "label": 1
+    }
+  ]
+}
