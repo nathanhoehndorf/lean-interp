@@ -27,80 +27,100 @@ def extract_variable_count(state_before: str) -> int:
 
     return count
 
+
+OUTPUT_PATH = "gold_dataset.json"
+# Updated for std4 repository paths
+# Update your TARGET_DOMAINS to match the Std library structure
 TARGET_DOMAINS = {
-    "Algebra": "Mathlib/Algebra/",
-    "Linear Algebra": "Mathlib/LinearAlgebra/",
-    "Analysis": "Mathlib/Analysis/",
-    "Probability": "Mathlib/Probability/",
-    "Geometry": "Mathlib/Geometry/",
-    "Logic/Set Theory": "Mathlib/Data"
+    # Original Domains
+    "Data Structures": "Std/Data",
+    "Logic": "Std/Logic",
+    "Time": "Std/Time",
+    "Control": "Std/Control",
+    "Classes": "Std/Classes",
+    
+    # System & I/O
+    "FileSystem": "Std/IO/FS",
+    "Network": "Std/IO/Net",
+    "Concurrency": "Std/Async",
+    "Environment": "Std/Sys/Env",
+    
+    # Mathematical & Scientific
+    "Math": "Std/Math/Core",
+    "Statistics": "Std/Math/Stats",
+    "Geometry": "Std/Math/Geo",
+    
+    # Text & Encoding
+    "String": "Std/Text/String",
+    "Regex": "Std/Text/Regex",
+    "Encoding": "Std/Text/Codec",
+    
+    # Security & Validation
+    "Crypto": "Std/Sec/Crypto",
+    "Auth": "Std/Sec/Auth",
+    "Validation": "Std/Util/Valid",
+    
+    # Diagnostics
+    "Logging": "Std/Diag/Log",
+    "Testing": "Std/Diag/Test"
 }
+
+def load_existing_data():
+    if os.path.exists(OUTPUT_PATH):
+        with open(OUTPUT_PATH, "r") as f:
+            return json.load(f)
+    return {"train": [], "val": [], "test": []}
+
+def save_data(data):
+    with open(OUTPUT_PATH, "w") as f:
+        json.dump(data, f, indent=2)
+
 
 repo = LeanGitRepo(
-    "https://github.com/leanprover-community/mathlib4", 
-    "609f87d46c764e488d0034a754b2d3989c9e883f"
+    "https://github.com/leanprover/std4", 
+    "main"
 )
 
-print("Tracing Mathlib4... This uses remote cache if available.")
 traced_repo = trace(repo)
 
-data_by_theorem = {}
-samples_per_domain = {domain: 0 for domain in TARGET_DOMAINS}
-MAX_SAMPLES_PER_DOMAIN = 1000
-
-for file in traced_repo.traced_files:
-    file_path = str(file.path)
-    current_domain = next((d for d, path in TARGET_DOMAINS.items() if path in file_path), None)
-    if not current_domain or samples_per_domain[current_domain] >= MAX_SAMPLES_PER_DOMAIN:
-        continue
-
-    print(f"[{current_domain}] Processing: {file.path}")
-    theorems = file.get_traced_theorems()
+# 1. Process Domain by Domain
+for domain_name, path_prefix in TARGET_DOMAINS.items():
+    print(f"\n--- Starting Section: {domain_name} ---")
     
-    for thm in theorems:
-        # thm.name instead of thm.theorem_name
-        thm_name = getattr(thm, "name", "Unknown")
-        tactics = thm.get_traced_tactics()
+    # Load what we have so far
+    current_dataset = load_existing_data()
+    
+    # Use a set for fast lookup of theorems already processed (optional but recommended)
+    # This requires storing theorem names, or just checking the data count
+    domain_samples = []
+    count = 0
 
-        pairs = []
-        for tactic in tactics:
-            state = tactic.state_before
-            if state:
-                y = extract_variable_count(state)
-                pairs.append({"state": state, "label": y})
-            
-        if pairs:
-            data_by_theorem[thm_name] = pairs
-            
-            # We only need one to prove the pipeline works!
+    for file in traced_repo.traced_files:
+        # IGNORE PATH FILTERS ENTIRELY FOR DEBUGGING
+        theorems = file.get_traced_theorems()
+        for thm in theorems:
+            tactics = thm.get_traced_tactics()
+            for tactic in tactics:
+                state = tactic.state_before
+                if state:
+                    y = extract_variable_count(state)
+                    domain_samples.append({"state": state, "label": y, "domain": domain_name})
+                    count += 1
+    # 2. Split the NEW domain samples
+    random.seed(42)
+    random.shuffle(domain_samples)
+    
+    n = len(domain_samples)
+    tr_end = int(n * 0.7)
+    val_end = int(n * 0.85)
 
-all_theorems = list(data_by_theorem.keys())
-random.seed(42)
-random.shuffle(all_theorems)
+    # 3. Append to existing dataset
+    current_dataset["train"].extend(domain_samples[:tr_end])
+    current_dataset["val"].extend(domain_samples[tr_end:val_end])
+    current_dataset["test"].extend(domain_samples[val_end:])
 
-n = len(all_theorems)
-train_end = int(n * 0.7)
-val_end = int(n * 0.85)
+    # 4. Save immediately after finishing a domain
+    save_data(current_dataset)
+    print(f"Finished {domain_name}. Total samples now: {len(current_dataset['train'])}")
 
-train_thms = all_theorems[:train_end]
-val_thms = all_theorems[train_end:val_end]
-test_thms = all_theorems[val_end:]
-
-def flatten_data(theorem_list):
-    return [pair for thm in theorem_list for pair in data_by_theorem[thm]]
-
-dataset = {
-    "train": flatten_data(train_thms),
-    "val": flatten_data(val_thms),
-    "test": flatten_data(test_thms)
-}
-
-output_path = "gold_dataset.json"
-with open(output_path, "w") as f:
-    json.dump(dataset, f, indent=2)
-
-print(f"\nHarvest Complete!")
-print(f"Total Theorems: {n}")
-print(f"Train samples: {len(dataset['train'])}")
-print(f"Val samples:   {len(dataset['val'])}")
-print(f"Test samples:  {len(dataset['test'])}")
+print("\nAll domains processed and saved to gold_dataset.json")
