@@ -3,7 +3,7 @@
 
 This repository contains the infrastructure for a Mechanistic Interpretability study probing how LLMs represent Lean 4 formal logic states.
 
-The project update and in-progress write-up are in the root of the repository.
+The most up-to-date progress report is the file `ProjectUpdate.md`.
 
 ## Project Structure
 - **`extract_data.py`**: The "Data Harvester." Uses LeanDojo to extract tactic states and generates labels (Variable Count).
