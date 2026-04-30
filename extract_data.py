@@ -27,6 +27,54 @@ def extract_variable_count(state_before: str) -> int:
 
     return count
 
+def extract_goal_depth(state: str) -> int:
+    if "⊢" not in state:
+        return 0
+    goal = state.split("⊢")[1].strip()
+    depth = goal.count('→') + goal.count('∀') + goal.count('∃')
+    return depth
+
+def extract_quantifier_presence(state: str) -> int:
+    return 1 if '∀' in state or '∃' in state else 0
+
+def extract_context_size(state: str) -> int:
+    if "⊢" not in state:
+        return 0
+    context = state.split("⊢")[0].strip()
+    return len([line for line in context.split('\n') if line.strip()])
+
+def extract_type_complexity(state: str) -> int:
+    return state.count('Type') + state.count('Sort') + state.count('Prop')
+
+def extract_inductive_vs_direct(state: str) -> int:
+    return 1 if 'inductive' in state.lower() or 'cases' in state.lower() else 0
+
+def extract_equality_vs_inequality(state: str) -> int:
+    if "⊢" not in state:
+        return 0
+    goal = state.split("⊢")[1]
+    return 1 if '=' in goal else 0
+
+def extract_unbound_variables(state: str) -> int:
+    if "⊢" not in state:
+        return 0
+    context = state.split("⊢")[0]
+    goal = state.split("⊢")[1]
+    context_vars = set(re.findall(r'\b[a-z_][a-z0-9_]*\b', context))
+    goal_vars = set(re.findall(r'\b[a-z_][a-z0-9_]*\b', goal))
+    unbound = goal_vars - context_vars
+    return len(unbound)
+
+def extract_token_labels(state: str) -> dict:
+    tokens = re.findall(r'\S+', state)
+    is_var = []
+    is_kwd = []
+    keywords = {'Sort', 'Prop', 'Type', '∀', '∃', '⊢', '→', '∧', '∨', '¬', 'λ', 'let', 'in', 'if', 'then', 'else', 'match', 'with', 'cases', 'inductive', 'structure', 'def', 'theorem', 'lemma', 'axiom', 'variable', 'parameters', 'assume', 'have', 'show', 'by', 'exact', 'apply', 'rewrite', 'simp', 'intro', 'intros', 'revert', 'clear', 'cases', 'induction', 'contradiction', 'trivial', 'sorry'}
+    for token in tokens:
+        is_var.append(1 if re.match(r'^[a-z_][a-z0-9_]*$', token) and token not in keywords else 0)
+        is_kwd.append(1 if token in keywords else 0)
+    return {'tokens': tokens, 'is_var': is_var, 'is_kwd': is_kwd}
+
 
 OUTPUT_PATH = "gold_dataset.json"
 # Updated for std4 repository paths
@@ -104,7 +152,18 @@ for domain_name, path_prefix in TARGET_DOMAINS.items():
                 state = tactic.state_before
                 if state:
                     y = extract_variable_count(state)
-                    domain_samples.append({"state": state, "label": y, "domain": domain_name})
+                    labels = {
+                        'variable_count': y,
+                        'goal_depth': extract_goal_depth(state),
+                        'quantifier_presence': extract_quantifier_presence(state),
+                        'context_size': extract_context_size(state),
+                        'type_complexity': extract_type_complexity(state),
+                        'inductive_vs_direct': extract_inductive_vs_direct(state),
+                        'equality_vs_inequality': extract_equality_vs_inequality(state),
+                        'unbound_variables': extract_unbound_variables(state),
+                        **extract_token_labels(state)
+                    }
+                    domain_samples.append({"state": state, "labels": labels, "domain": domain_name})
                     count += 1
     # 2. Split the NEW domain samples
     random.seed(42)

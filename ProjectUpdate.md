@@ -35,10 +35,10 @@ The current pipeline utilizes the `HookedTransformer` library to extract activat
 To determine the extent of linear representation, the probe must test various dimensions of a proof state. The current pipeline evaluates Variable Count (the number of active variables in the context). Future experiments will test the following 7 mathematical features:
 
 1. **Goal Depth/Complexity**: The number of nested implications or operators in the target `⊢` goal.
-2. **Quantifier Presence**: Binary classification, whether or not proof state relies on universal (`$\forall$`) or exitential (`$\exists$`) quantifiers.
+2. **Quantifier Presence**: Binary classification, whether or not proof state relies on universal (`$\forall$`) or existential (`$\exists$`) quantifiers.
 3. **Context Size**: The raw number of hypotheses currently loaded into the local context.
-4. **Type Complexity**: Classification of the highest-order type present
-5. **Inductive vs. Direct**: Binary classification of whether the current state is inside an inductive step
+4. **Type Complexity**: Classification of the highest-order type present.
+5. **Inductive vs. Direct**: Binary classification of whether the current state is inside an inductive step.
 6. **Equality vs Inequality**: Whether the primary goal is proving an equivalence or a bound.
 7. **Unbound Variables**: The count of variables in the goal that have not yet been instantiated.
 
@@ -51,7 +51,7 @@ We establish a lower-bound performance metric by training a linear probe on a ve
 
 The purpose of this is to test our Null Hypothesis. If the probe trained on real labels does not significantly outperform the shuffled-label probe, we conclude that the model's residual stream contains no recoverable linear signal for that feature.
 
-### Syntatic Control Features (Token Length Correlation)
+### Syntactic Control Features (Token Length Correlation)
 
 LLMs often correlate complexity with sequence length. To ensure the probe is not simply regressing on the number of tokens in a proof state, we introduce a **Control Feature**: a meaningless metric that is highly correlated with input size, like total character count or number of whitespace characters.
 
