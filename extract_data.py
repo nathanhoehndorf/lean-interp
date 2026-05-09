@@ -3,29 +3,8 @@ import json
 import random
 from lean_dojo_v2.lean_dojo import LeanGitRepo, trace
 import re
+from features import FEATURES
 
-def extract_variable_count(state_before: str) -> int:
-    if not state_before or "⊢" not in state_before:
-        return 0
-    
-    local_context = state_before.split("⊢")[0].strip()
-    if not local_context:
-        return 0
-    
-    count = 0
-    lines = local_context.split('\n')
-    for line in lines:
-        line = line.strip()
-        if not line or line.startswith('case'):
-            continue
-
-        if ':' in line:
-            names_part = line.split(':')[0].strip()
-            clean_names = re.sub(r'[\{\}\[\]]', '', names_part).strip()
-            vars_on_line = clean_names.split()
-            count += len(vars_on_line)
-
-    return count
 
 def extract_goal_depth(state: str) -> int:
     if "⊢" not in state:
@@ -151,18 +130,8 @@ for domain_name, path_prefix in TARGET_DOMAINS.items():
             for tactic in tactics:
                 state = tactic.state_before
                 if state:
-                    y = extract_variable_count(state)
-                    labels = {
-                        'variable_count': y,
-                        'goal_depth': extract_goal_depth(state),
-                        'quantifier_presence': extract_quantifier_presence(state),
-                        'context_size': extract_context_size(state),
-                        'type_complexity': extract_type_complexity(state),
-                        'inductive_vs_direct': extract_inductive_vs_direct(state),
-                        'equality_vs_inequality': extract_equality_vs_inequality(state),
-                        'unbound_variables': extract_unbound_variables(state),
-                        **extract_token_labels(state)
-                    }
+                    labels = {feature.name: feature.extract(state) for feature in FEATURES}
+                    labels.update(extract_token_labels(state))
                     domain_samples.append({"state": state, "labels": labels, "domain": domain_name})
                     count += 1
     # 2. Split the NEW domain samples

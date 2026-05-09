@@ -10,6 +10,8 @@ dependencies = [
     "lean-dojo-v2>=1.0.8",
     "pantograph",
     "transformer-lens>=2.18.0",
+    "matplotlib>=3.7",
+    "seaborn>=0.13.2",
 ]
 
 [tool.uv.sources]

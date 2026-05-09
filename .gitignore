@@ -1,4 +1,6 @@
 key.txt
 model_weights/
 __pycache__/
-activations_cache_layer18.ptactivations_cache_layer0.pt
+activations_cache_layer18.pt
+activations_cache_layer0.pt
+.env
