@@ -1,0 +1,31 @@
+{
+  "mode": "control",
+  "layers": [
+    0,
+    1
+  ],
+  "binary": {
+    "quantifier_presence": [
+      0.5,
+      0.5
+    ],
+    "equality_vs_inequality": [
+      0.5,
+      0.5
+    ],
+    "inductive_structure": [
+      0.5,
+      0.5
+    ]
+  },
+  "regression": {
+    "variable_count": [
+      0.6706655621528625,
+      0.1506546437740326
+    ]
+  },
+  "char_count_baseline": [
+    3.734149932861328,
+    1.1561436653137207
+  ]
+}

@@ -1,6 +1,12 @@
 key.txt
 model_weights/
 __pycache__/
-activations_cache_layer18.pt
-activations_cache_layer0.pt
 .env
+data/activations_cache_layer18.pt
+data/activations_cache_layer0.pt
+data/states_gold_dataset.json
+data/states.jsonl
+data/states.labeled.jsonl
+# activations cache files can be large, ignoring them by default except maybe small ones
+data/activations_cache_*.pt
+# except small ones if needed, but usually best to ignore all if they are results of runs

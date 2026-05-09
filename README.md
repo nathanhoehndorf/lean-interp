@@ -3,26 +3,39 @@
 
 This repository contains the infrastructure for a Mechanistic Interpretability study probing how LLMs represent Lean 4 formal logic states.
 
-The most up-to-date progress report is the file `ProjectUpdate.md`.
+## Repository Structure
 
-## MVP Usage
+- `TheGeometryOfFormalLogic/`: Main source code for the project.
+  - `main.py`: End-to-end probing workflow.
+  - `config.py`: Configuration and CLI argument handling.
+  - `extract_activations.py`: Tools for extracting model activations.
+  - `loader.py`: Dataset loading utilities.
+  - `model.py`: Model loading and initialization.
+- `data/`: Experimental data, logs, and raw results.
+  - `results/`: JSON result files from probing runs.
+  - `data/`: Parquet files used for training/validation.
+  - `gold_dataset.json`: The processed dataset used for probing (53MB).
+  - *Large datasets (>100MB) such as `states.jsonl` and `activations_cache_*.pt` are excluded from this repository due to size constraints.*
+- `docs/`: Project documentation and writeups.
+  - `ProjectUpdate.md`: Latest progress report and methodology.
+  - `figures/`: Figures and plots generated from experiments.
+- `notebooks/`: Jupyter notebooks for exploratory analysis (currently empty).
 
-The repository now includes an end-to-end probing workflow in `main.py` with layer-wise figures and binary feature metrics.
+## Usage
 
-Example control run using a text-trained GPT-2 model:
+The project uses `uv` for dependency management. To run the probing workflow:
 
 ```bash
-python main.py --mode control --sweep-layers
+uv run TheGeometryOfFormalLogic/main.py --mode control --sweep-layers
 ```
 
-Example tester run using a Lean-trained model:
+By default, the results and figures will be saved in `data/results/` and `docs/figures/` (configured via `config.py`).
 
-```bash
-python main.py --mode tester --sweep-layers
-```
+## Datasets
 
-By default, control mode uses the local `./model_weights/gpt2` checkpoint and tester mode uses `RickyDeSkywalker/TheoremLlama`.
+The primary dataset used is `gold_dataset.json`. Larger raw files and activation caches are managed locally and ignored by git.
 
-Next Steps:
-1. Binary Classifier, Logistic Regression, Linear Support Vector Machine (separates activations based on a binary property)
-2. Mass-Mean, Mean-Difference ()
+## Writeup
+
+The project writeup and results can be found in `docs/ProjectUpdate.md`.
+*(Note: Final PDF writeup will be added to the `docs/` directory upon completion.)*
