@@ -37,5 +37,4 @@ The primary dataset used is `gold_dataset.json`. Larger raw files and activation
 
 ## Writeup
 
-The project writeup and results can be found in `docs/ProjectUpdate.md`.
-*(Note: Final PDF writeup will be added to the `docs/` directory upon completion.)*
+The project writeup and results can be found in `docs/TheGeometryofProof.pdf`.
