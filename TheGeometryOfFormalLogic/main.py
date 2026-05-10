@@ -17,7 +17,17 @@ import pandas as pd
 import seaborn as sns
 
 def test_feature_correlations(labels: list[dict], output_dir: Path):
-    df = pd.DataFrame(labels)
+    # Filter out labels that are lists or non-numeric
+    numeric_labels = []
+    for label_dict in labels:
+        numeric_dict = {k: v for k, v in label_dict.items() if isinstance(v, (int, float, bool))}
+        numeric_labels.append(numeric_dict)
+    
+    df = pd.DataFrame(numeric_labels)
+    if df.empty:
+        print("No numeric features found for correlation analysis.")
+        return None
+        
     corr_matrix = df.corr()
 
     print("\n--- Feature Correlation Matrix ---")
@@ -232,6 +242,13 @@ def load_or_build_dataset(cache_path: Path, model, train_prompts: list[str], tra
 
 
 def run_layer_probe(model, train_prompts, train_labels, test_prompts, test_labels, layers: list[int], output_dir: Path):
+    if config.shuffle:
+        print("SHUFFLE MODE ENABLED: Shuffling labels to establish random baseline...")
+        import random
+        random.seed(42)
+        random.shuffle(train_labels)
+        random.shuffle(test_labels)
+
     cache_file = build_cache_filename(config, layers)
     X_train, y_train, X_test, y_test = load_or_build_dataset(cache_file, model, train_prompts, train_labels, test_prompts, test_labels, layers)
     X_train_norm, X_test_norm = normalize_dataset(X_train, X_test)
